@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tic Tac Toe</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh;
+    background: #1a1a2e; color: #eee;
+  }
+  .container { text-align: center; }
+  h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: #e94560; }
+  #status { font-size: 1.3rem; margin-bottom: 1rem; min-height: 2rem; }
+  .board {
+    display: grid; grid-template-columns: repeat(3, 120px);
+    grid-template-rows: repeat(3, 120px);
+    gap: 6px; margin: 0 auto 1.5rem;
+  }
+  .cell {
+    background: #16213e; border: 2px solid #0f3460;
+    border-radius: 8px; font-size: 3rem; font-weight: bold;
+    cursor: pointer; transition: background 0.2s, transform 0.1s;
+    display: flex; justify-content: center; align-items: center;
+  }
+  .cell:hover { background: #1a2a50; transform: scale(1.03); }
+  .cell.x { color: #e94560; }
+  .cell.o { color: #0fbcf9; }
+  .cell.win { background: #0f3460; animation: pulse 0.6s ease-in-out infinite alternate; }
+  @keyframes pulse { to { transform: scale(1.08); } }
+  #restart {
+    padding: 0.7rem 2rem; font-size: 1.1rem; border: none; border-radius: 6px;
+    background: #e94560; color: #fff; cursor: pointer; transition: background 0.2s;
+  }
+  #restart:hover { background: #c81e45; }
+  .score-board { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1rem; font-size: 1.1rem; }
+  .score-board span { padding: 0.3rem 1rem; border-radius: 4px; background: #16213e; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Tic Tac Toe</h1>
+  <div class="score-board">
+    <span>X: <strong id="scoreX">0</strong></span>
+    <span>Draw: <strong id="scoreD">0</strong></span>
+    <span>O: <strong id="scoreO">0</strong></span>
+  </div>
+  <div id="status">X's turn</div>
+  <div class="board" id="board"></div>
+  <button id="restart">New Game</button>
+</div>
+<script>
+const board = document.getElementById('board');
+const status = document.getElementById('status');
+const restartBtn = document.getElementById('restart');
+const scoreEls = { X: document.getElementById('scoreX'), O: document.getElementById('scoreO'), D: document.getElementById('scoreD') };
+const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+let cells, current, gameOver, scores = { X: 0, O: 0, D: 0 };
+
+function init() {
+  board.innerHTML = '';
+  cells = Array(9).fill('');
+  current = 'X';
+  gameOver = false;
+  status.textContent = "X's turn";
+  for (let i = 0; i < 9; i++) {
+    const div = document.createElement('div');
+    div.classList.add('cell');
+    div.dataset.index = i;
+    div.addEventListener('click', handleClick);
+    board.appendChild(div);
+  }
+}
+
+function handleClick(e) {
+  const i = e.target.dataset.index;
+  if (gameOver || cells[i]) return;
+  cells[i] = current;
+  const cell = e.target;
+  cell.textContent = current;
+  cell.classList.add(current.toLowerCase());
+
+  const winCombo = wins.find(c => c.every(idx => cells[idx] === current));
+  if (winCombo) {
+    gameOver = true;
+    status.textContent = `${current} wins!`;
+    winCombo.forEach(idx => board.children[idx].classList.add('win'));
+    scores[current]++;
+    scoreEls[current].textContent = scores[current];
+    return;
+  }
+  if (cells.every(c => c)) {
+    gameOver = true;
+    status.textContent = "It's a draw!";
+    scores.D++;
+    scoreEls.D.textContent = scores.D;
+    return;
+  }
+  current = current === 'X' ? 'O' : 'X';
+  status.textContent = `${current}'s turn`;
+}
+
+restartBtn.addEventListener('click', init);
+init();
+</script>
+</body>
+</html>
